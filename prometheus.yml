@@ -1,0 +1,47 @@
+# global config
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'bti-project'
+
+#Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      - 10.1.178.39:9093
+
+rule_files:
+  - /etc/prometheus/alert_rules.yml
+  # - "second_rules.yml"
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['10.1.178.39:9100']
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [monitor_endpoints]  # Look for a HTTP 200 response.
+    static_configs:
+      - targets:
+        - http://10.1.178.39:8085/nin-processor-job/actuator/health
+        - http://10.1.178.39:8084/field-validator-listener/actuator/health
+        - http://10.1.178.39:8083/reg/actuator/health
+        - http://10.1.178.39:8081/auth/actuator/health    # Target to probe with http.
+        - http://10.1.178.39:8082/user/actuator/health   # Target to probe with http.
+        - http://10.1.178.39:8080 # Target to probe with http on port 80.
+        - http://10.1.178.39:3333/role
+        - http://10.1.178.39:8087/pwd-expiry-notification-job/actuator/health
+        - http://10.1.178.39:8086/pwd-cycle-job/actuator/health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: 10.1.178.39:9115  # The blackbox exporter's real hostname:port

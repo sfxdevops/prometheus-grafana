@@ -1,0 +1,122 @@
+groups:
+- name: alert.rules
+  rules:
+  - alert: InstanceDown
+    expr: up == 0
+    for: 1m
+    labels:
+      severity: "critical"
+    annotations:
+      summary: "Endpoint {{ $labels.instance }} down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minutes."
+  
+  - alert: HostOutOfMemory
+    expr: node_memory_MemAvailable / node_memory_MemTotal * 100 < 25
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host out of memory (instance {{ $labels.instance }})"
+      description: "Node memory is filling up (< 25% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+
+  - alert: HostOutOfDiskSpace
+    expr: (node_filesystem_avail{mountpoint="/"}  * 100) / node_filesystem_size{mountpoint="/"} < 50
+    for: 1s
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host out of disk space (instance {{ $labels.instance }})"
+      description: "Disk is almost full (< 50% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+
+  - alert: HostHighCpuLoad
+    expr: (sum by (instance) (irate(node_cpu{job="node_exporter_metrics",mode="idle"}[5m]))) > 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host high CPU load (instance {{ $labels.instance }})"
+      description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: BTI-web-portal
+    expr: probe_success{instance="http://10.1.178.39:8080", job="blackbox"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: bti-web-portal is down
+      discription: "BTI web portal is down"
+
+  - alert: field-validator-listner
+    expr: probe_success{instance="http://10.1.178.39:8084/field-validator-listener/actuator/health", job="blackbox"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: field-validatr-listener is down
+      discription: "field validator is down"
+
+  - alert: nin-processor-job
+    expr: probe_success{instance="http://10.1.178.39:8085/nin-processor-job/actuator/health", job="blackbox"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: nin-processor-job is down
+      discription: "nin-processor-job is down"
+
+  - alert: auth-service
+    expr: probe_success{instance="http://10.1.178.39:8081/auth/actuator/health", job="blackbox"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: auth service is down
+      discription: "auth service is down"
+
+  - alert: role-service
+    expr: probe_success{instance="http://10.1.178.39:3333/role", job="blackbox"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: role service is down
+      discription: "role service is down"
+
+  - alert: reg-service
+    expr: probe_success{instance="http://10.1.178.39:8083/reg/actuator/health", job="blackbox"} == 0
+    for: 1m
+    labels:     
+      severity: critical
+    annotations:
+      summary: reg service is down
+      discription: "reg service is down"
+
+  - alert: pwd-expiry-notification-service
+    expr: probe_success{instance="http://10.1.178.39:8087/pwd-expiry-notification-job/actuator/health", job="blackbox"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: pwd-expiry-notification service is down
+      discription: "pwd-expiry-notification service is down"
+
+  - alert: user-service
+    expr: probe_success{instance="http://10.1.178.39:8082/user/actuator/health", job="blackbox"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: user service is down
+      discription: "user service is down"
+
+  - alert: pwd-cycle-job
+    expr: probe_success{instance="http://10.1.178.39:8086/pwd-cycle-job/actuator/health", job="blackbox"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: pwd-cycle-job service is down
+      discription: "pwd-cycle-job service is down"
+
